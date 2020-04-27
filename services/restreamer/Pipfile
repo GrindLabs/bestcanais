@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+flake8 = "*"
+autopep8 = "*"
+fabric = "*"
+
+[packages]
+requests = "*"
+prettyconf = "*"
+apscheduler = "*"
+pymongo = "*"
+pyyaml = "*"
+mongoengine = "*"
+
+[requires]
+python_version = "3.6"

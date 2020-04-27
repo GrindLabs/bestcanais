@@ -1,0 +1,15 @@
+# Ignore hidden folders
+.git/
+.vscode/*
+.idea/
+.deploy/
+
+# Accept VSCode settings file
+!.vscode/settings.json
+
+# Ignore common folders
+node_modules/
+
+# Ignore setup files
+*.env
+settings-production.json

@@ -1,0 +1,3 @@
+/*
+  This file is exclusivelly only to detect AdBlockers.
+*/

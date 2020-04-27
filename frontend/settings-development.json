@@ -1,0 +1,33 @@
+{
+  "public": {
+    "site": {
+      "name": "AssistirTV.GRATIS",
+      "URL": "https://assistirtv.gratis",
+      "lang": "pt-br",
+      "title": "Assistir TV GRÁTIS!",
+      "description": "O melhor da programação dos canais pagos, totalmente de graça para você! Assista gratuitamente todos os jogos dos campeonatos de futebol no Premire, as lutas exclusivas do canal Combate, além de muitos outros canais de filmes, séries e reality shows.",
+      "keywords": "assitir tv, assistir tv gratis, tv gratis, assistir tv online, tv, tv online, tv online gratis, assistir tv online gratis, premiere gratis, premiere, combate gratis, combate, luta, futebol, campeonato brasileiro, copa america, ufc, libertadores, copa do brasil, mma, a fazenda, bbb, big brother brasil, de ferias com o ex, catfish brasil, reality, reality show, series, filmes, tv por assinatura, iptv"
+    },
+    "player": {
+      "retries": 3,
+      "retriesDelay": 500,
+      "bypassURL": "https://assistirtv.gratis/watch/",
+      "trackerName": "AssistirTvPlayer"
+    },
+    "google": {
+      "siteVerification": "Ec0jhW5Luz8MEDBx28K-ubTiwtBSIet0WplCGBmiD2E",
+      "analytics": "UA-146080817-1",
+      "adsense": "ca-pub-8801691334215483"
+    },
+    "exoclick": {
+      "siteVerification": "16644f04ef336394df6e38368b81f565"
+    },
+    "channel": {
+      "priority": {
+        "low": 1,
+        "normal": 5,
+        "high": 10
+      }
+    }
+  }
+}

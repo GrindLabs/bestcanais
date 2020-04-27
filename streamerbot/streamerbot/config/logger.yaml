@@ -1,0 +1,43 @@
+version: 1
+
+root:
+  handlers:
+    - console
+    - file
+  propagate: no
+
+loggers:
+  asyncio:
+    level: ERROR
+  pyppeteer:
+    level: ERROR
+  websockets.protocol:
+    level: ERROR
+  websockets.client:
+    level: ERROR
+  urllib3.connectionpool:
+    level: ERROR
+  development:
+    level: DEBUG
+  production:
+    level: INFO
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: default
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: INFO
+    formatter: default
+    filename: logs/streamerbot/streamerbot.log
+    when: midnight
+    backupCount: 5
+    encoding: utf8
+
+formatters:
+  default:
+    format: "%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(name)-15s %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"

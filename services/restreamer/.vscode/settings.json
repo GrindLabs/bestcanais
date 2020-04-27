@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "python.pythonPath": "/home/alexandre/.local/share/virtualenvs/atlas-restreamer-gIYv-D4O/bin/python",
+  "python.envFile": "${workspaceFolder}/restreamer/.env"
+}

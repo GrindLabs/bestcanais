@@ -1,0 +1,5 @@
+div[data-player] {
+  position: relative;
+  padding-bottom: 56.25%;
+  margin: 0 auto;
+}
