@@ -21,8 +21,10 @@ from dotenv import load_dotenv
 # Load the environment file
 env_vars = pkgutil.get_data('streamerbot', 'config/.env')
 load_dotenv(stream=StringIO(env_vars.decode('utf-8')))
+
 # Setup the environment
 DEBUG = int(os.getenv('DEBUG')) == 1 if os.getenv('DEBUG') else True
+
 # Setup MongoDB
 MONGODB_CONN_URI = os.getenv('MONGODB_CONN_URI')
 MONGODB_DB_HOST = os.getenv('MONGODB_DB_HOST')
@@ -30,8 +32,7 @@ MONGODB_DB_PORT = os.getenv('MONGODB_DB_PORT')
 MONGODB_DB_NAME = os.getenv('MONGODB_DB_NAME')
 MONGODB_DB_USER = os.getenv('MONGODB_DB_USER')
 MONGODB_DB_PASS = os.getenv('MONGODB_DB_PASS')
-# Pyppeteer settings
-PYPPETEER_CHROME_PATH = os.getenv('PYPPETEER_CHROME_PATH')
+
 # Stream settings
 STREAM_PRIORITY = {'FHD': 0, 'HD': 1, 'SD': 2}
 
@@ -51,8 +52,7 @@ NEWSPIDER_MODULE = 'streamerbot.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the
 # user-agent
-USER_AGENT = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-              '(KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
+USER_AGENT = os.getenv('CRAWLER_USER_AGENT')
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False

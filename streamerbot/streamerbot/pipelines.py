@@ -4,19 +4,13 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-import asyncio
 import datetime
 import re
 import time
 import urllib.request
-from asyncio.exceptions import IncompleteReadError, InvalidStateError
-from asyncio.exceptions import TimeoutError as TimeoutErrorAsyncio
 from urllib.error import URLError
 
 from pymongo import MongoClient
-from pyppeteer import launch
-from pyppeteer.errors import BrowserError, PageError, TimeoutError
 
 from streamerbot import settings
 from streamerbot.settings import logger
@@ -79,61 +73,8 @@ class ChannelVerificationPipeline(MongoBasePipeline):
 
 
 class ExtractM3U8Pipeline(object):
-    async def parse_stream(self, item):
-        channel_url = item.get('channel_url')
-
-        try:
-            browser = await launch(
-                executablePath=settings.PYPPETEER_CHROME_PATH,
-                headless=True,
-                options={
-                    'args': [
-                        '--disable-gpu',
-                        '--disable-dev-shm-usage',
-                        '--disable-setuid-sandbox',
-                        '--no-first-run',
-                        '--no-sandbox',
-                        '--no-zygote',
-                        '--single-process'
-                    ]
-                }
-            )
-            page = await browser.newPage()
-            page.on('request', lambda r, i=item: self.parse_m3u8(r, i))
-            await page.goto(channel_url, waitUntil='networkidle0',
-                            timeout=60000)
-            await page.close()
-        except (BrowserError, PageError, TimeoutError) as err:
-            logger.warning(('Browser malfunctioning while trying to extract '
-                            'the M3U8 link from {0}: "{1}"').format(
-                                channel_url, str(err)))
-        finally:
-            await browser.close()
-
-    def parse_m3u8(self, request, item):
-        found = re.match(r'.*\.m3u8.*', request.url)
-
-        if found:
-            item['stream_url'] = found.group(0)
-
     def process_item(self, item, spider):
         logger.debug('Exctracting M3U8 link from {0}'.format(
-            item.get('channel_url')))
-
-        try:
-            asyncio.get_event_loop().run_until_complete(
-                self.parse_stream(item))
-        except (IncompleteReadError, InvalidStateError,
-                TimeoutErrorAsyncio) as err:
-            logger.warning(
-                'Asyncio malfunctioning while running puppeteer: {0}'.format(
-                    str(err)))
-
-        if item.get('stream_url'):
-            logger.info('Found M3U8 link: {0}'.format(item.get('stream_url')))
-            return item
-
-        logger.warning('No M3U8 link found for {0}'.format(
             item.get('channel_url')))
 
 
