@@ -4,10 +4,24 @@
 #
 # See: https://docs.scrapy.org/en/latest/topics/loaders.html#input-and-output-processors
 
-def default_processor(self, values):
+import re
+
+from streamerbot import settings
+
+
+def extract_quality(value):
+    """Extract the quality value from the channel title
+
+    Arguments:
+        value {string} -- The channel name
+
+    Returns:
+        int -- The quality value
     """
-    This is an example of processor, please remove it or rename the function
-    and refactor its behavior.
-    """
-    for value in values:
-        yield value.lower()
+    quality = re.search(r'({0})$'.format(
+        '|'.join(list(settings.STREAM_PRIORITY.keys()))), value)
+
+    if quality:
+        return settings.STREAM_PRIORITY.get(quality.group(0))
+
+    return settings.STREAM_PRIORITY.get('SD')

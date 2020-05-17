@@ -4,20 +4,20 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-import datetime
-import re
-import time
-import urllib.request
-from urllib.error import URLError
 
+import datetime
+import time
+
+import requests
 from pymongo import MongoClient
+from requests.exceptions import HTTPError
 
 from streamerbot import settings
 from streamerbot.settings import logger
 
 
 class MongoBasePipeline(object):
-    collection_name = 'streams'
+    collection_name = 'channels'
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
@@ -41,58 +41,64 @@ class MongoBasePipeline(object):
         return item
 
 
-class ChannelVerificationPipeline(MongoBasePipeline):
-    collection_name = 'channels'
-
-    def process_item(self, item, spider):
-        channel_url = item.get('channel_url')
-        logger.debug('Verifying channel URL from {0}'.format(channel_url))
-        channels = self.db[self.collection_name].find({'isActive': True})
-        block = spider.source['blocks'][0]
-
-        for channel in channels:
-            regex_name = re.sub(r'\s+', '.*', channel['name'])
-            found = re.match(
-                r'{0}'.format(block['regex'].format(regex_name)),
-                channel_url,
-                flags=re.IGNORECASE
-            )
-
-            if found:
-                logger.debug('Regex result: {0}'.format(found.groups()))
-                quality = found.group(2).upper() if found.group(2) else 'SD'
-                logger.info(
-                    'Found channel {0} with quality {1}'.format(
-                        channel['name'], quality))
-                item['quality'] = quality
-                item['priority'] = settings.STREAM_PRIORITY[quality]
-                item['channel_id'] = channel['_id']
-                return item
-
-        logger.warning('No channels found for URL {0}'.format(channel_url))
-
-
 class ExtractM3U8Pipeline(object):
     def process_item(self, item, spider):
-        logger.debug('Exctracting M3U8 link from {0}'.format(
-            item.get('channel_url')))
+        logger.info('Exctracting M3U8 from {0}'.format(
+            item.get('url')))
+        payload = {
+            'method': 'extractStream',
+            'params': {
+                'url': item.get('url'),
+                'ext': 'm3u8'
+            },
+            'jsonrpc': '2.0',
+            'id': int(time.time())
+        }
+        logger.debug('Payload: {0}'.format(payload))
+        result = requests.post(settings.PUPPETEER_SERVICE_URL, json=payload)
+        logger.debug('Puppeteer service status: {0}'.format(
+            result.status_code))
+
+        try:
+            result.raise_for_status()
+            json_data = result.json()
+            item['stream_url'] = json_data.get('result', None)
+            logger.info('Extracted M3U8 link: {0}'.format(
+                item.get('stream_url')
+                if item.get('stream_url')
+                else 'not found'))
+        except HTTPError as err:
+            logger.warning(
+                'Unable to reach the Puppeteer Service: {0}'.format(str(err)))
+            item['stream_url'] = None
+
+        return item
 
 
 class StreamVerificationPipeline(object):
     def process_item(self, item, spider):
-        logger.debug('Verifying stream URL {0}'.format(
-            item.get('stream_url', 'Not Found')))
+        if not item.get('stream_url'):
+            logger.warning('There is no stream URL to verify... skipping')
+            item['is_active'] = False
+            return item
+
+        logger.info('Verifying stream URL {0}'.format(
+            item.get('stream_url')))
+
+        result = requests.get(item.get('stream_url'))
 
         try:
-            req = urllib.request.urlopen(item.get('stream_url'))
-            item['is_active'] = req.getcode() == 200
-        except URLError as err:
+            result.raise_for_status()
+            item['is_active'] = result.status_code == 200
+        except HTTPError as err:
             logger.warning(
-                'While trying to verify the stream: {0}'.format(str(err)))
+                'Unable to verify the stream URL: {0}'.format(str(err)))
             item['is_active'] = False
 
-        logger.debug('[{0}] {1}'.format(
-            'ON' if item.get('is_active') else 'OFF', item.get('stream_url')))
+        logger.info('[{0}] {1}'.format(
+            'ON' if item.get('is_active') else 'OFF', item.get(
+                'stream_url')))
+
         return item
 
 
@@ -102,26 +108,26 @@ class MongoPipeline(MongoBasePipeline):
             self.collection_name, item))
         result = self.db[self.collection_name].update_one(
             {
-                'quality': item.get('quality'),
-                'priority': item.get('priority'),
-                'channelId': item.get('channel_id'),
+                'url': item.get('url'),
                 'sourceId': item.get('source_id')
             },
             {
                 '$set': {
-                    'URL': item.get('stream_url'),
+                    'name': item.get('name'),
+                    'slug': item.get('slug'),
+                    'logo': item.get('logo'),
                     'quality': item.get('quality'),
-                    'priority': item.get('priority'),
-                    'channelId': item.get('channel_id'),
-                    'sourceId': item.get('source_id'),
+                    'url': item.get('url'),
+                    'stream_url': item.get('stream_url'),
                     'isActive': item.get('is_active'),
+                    'sourceId': item.get('source_id'),
                     'verifiedAt': datetime.datetime.utcfromtimestamp(
                         time.time())
                 }
             },
             upsert=True
         )
-        logger.info('Stream {0} successfully: {1}'.format(
+        logger.info('Channel {0} successfully: {1}'.format(
             'updated' if result.modified_count else 'created',
-            item.get('stream_url')))
+            item.get('name')))
         return item

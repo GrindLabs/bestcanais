@@ -12,24 +12,24 @@ class AoVivoClubSpider(scrapy.Spider):
         super(AoVivoClubSpider, self).__init__(*args, **kwargs)
         self.client = MongoClient(settings.MONGODB_CONN_URI)
         self.db = self.client.get_database(settings.MONGODB_DB_NAME)
-        self.source = self.db.sources.find_one({'alias': self.name})
+        self.source = self.db.sources.find_one({'slug': self.name})
 
         if not self.source:
             raise Exception(
                 'Unable to find the source "{0}" in the database'.format(
                     self.name))
 
-        self.start_urls = self.source['lookup']
-        self.allowed_domains = list(self.source['domain'])
+        self.start_urls = self.source.get('lookup')
+        self.allowed_domains = list(self.source.get('domain'))
         self.client.close()
 
     def parse(self, response):
-        itemLoader = StreamerBotItemLoader(response=response)
+        for block in self.source.get('blocks'):
+            for channel in response.xpath(block.get('path')):
+                loader = StreamerBotItemLoader(selector=channel)
+                loader.add_value('source_id', self.source.get('_id'))
 
-        for block in self.source['blocks']:
-            urls = itemLoader.get_xpath(block['path'])
+                for field in self.source.get('fields'):
+                    loader.add_xpath(field.get('key'), field.get('path'))
 
-            for url in urls:
-                itemLoader.replace_value('channel_url', url)
-                itemLoader.replace_value('source_id', self.source['_id'])
-                yield itemLoader.load_item()
+                yield loader.load_item()

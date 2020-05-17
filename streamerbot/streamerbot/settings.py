@@ -8,15 +8,15 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+
 import logging
 import os
 import pkgutil
 from io import StringIO
 
 import yaml
-from scrapy.utils.log import configure_logging
-
 from dotenv import load_dotenv
+from scrapy.utils.log import configure_logging
 
 # Load the environment file
 env_vars = pkgutil.get_data('streamerbot', 'config/.env')
@@ -34,7 +34,17 @@ MONGODB_DB_USER = os.getenv('MONGODB_DB_USER')
 MONGODB_DB_PASS = os.getenv('MONGODB_DB_PASS')
 
 # Stream settings
-STREAM_PRIORITY = {'FHD': 0, 'HD': 1, 'SD': 2}
+STREAM_PRIORITY = {
+    'FHD': 0,
+    '1080p': 0,
+    'HD': 1,
+    '720p': 1,
+    'SD': 2,
+    '480p': 2
+}
+
+# Puppeteer service settings
+PUPPETEER_SERVICE_URL = os.getenv('PUPPETEER_SERVICE_URL')
 
 # Logging setup
 logger_config = pkgutil.get_data('streamerbot', 'config/logger.yaml')
@@ -101,10 +111,9 @@ TELNETCONSOLE_ENABLED = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'streamerbot.pipelines.ChannelVerificationPipeline': 300,
-    'streamerbot.pipelines.ExtractM3U8Pipeline': 301,
-    'streamerbot.pipelines.StreamVerificationPipeline': 302,
-    'streamerbot.pipelines.MongoPipeline': 303,
+    'streamerbot.pipelines.ExtractM3U8Pipeline': 300,
+    'streamerbot.pipelines.StreamVerificationPipeline': 301,
+    'streamerbot.pipelines.MongoPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
