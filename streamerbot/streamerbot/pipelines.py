@@ -46,10 +46,10 @@ class ExtractM3U8Pipeline(object):
         logger.info('Exctracting M3U8 from {0}'.format(
             item.get('url')))
         payload = {
-            'method': 'extractStream',
+            'method': 'extractRequestURI',
             'params': {
                 'url': item.get('url'),
-                'ext': 'm3u8'
+                'regex': '.*\\.m3u8.*'
             },
             'jsonrpc': '2.0',
             'id': int(time.time())
