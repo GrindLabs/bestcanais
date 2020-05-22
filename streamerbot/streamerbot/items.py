@@ -18,3 +18,4 @@ class StreamerBotItem(scrapy.Item):
     is_active = scrapy.Field()
     source_id = scrapy.Field()
     verified_at = scrapy.Field()
+    rpc_method = scrapy.Field()

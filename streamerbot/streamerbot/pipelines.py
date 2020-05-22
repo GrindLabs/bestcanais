@@ -46,7 +46,9 @@ class ExtractM3U8Pipeline(object):
         logger.info('Exctracting M3U8 from {0}'.format(
             item.get('url')))
         payload = {
-            'method': 'extractRequestURI',
+            'method': 'extractRequestURI'
+            if not item.get('rpc_method')
+            else item.get('rpc_method'),
             'params': {
                 'url': item.get('url'),
                 'regex': '.*\\.m3u8.*'
@@ -62,6 +64,7 @@ class ExtractM3U8Pipeline(object):
         try:
             result.raise_for_status()
             json_data = result.json()
+            logger.debug('Response: {0}'.format(json_data))
             item['stream_url'] = json_data.get('result', None)
             logger.info('Extracted M3U8 link: {0}'.format(
                 item.get('stream_url')
@@ -85,7 +88,8 @@ class StreamVerificationPipeline(object):
         logger.info('Verifying stream URL {0}'.format(
             item.get('stream_url')))
 
-        result = requests.get(item.get('stream_url'))
+        result = requests.get(item.get('stream_url'), headers={
+                              'Referer': item.get('url')})
 
         try:
             result.raise_for_status()
@@ -104,8 +108,7 @@ class StreamVerificationPipeline(object):
 
 class MongoPipeline(MongoBasePipeline):
     def process_item(self, item, spider):
-        logger.debug('Updating "{0}" collection with item: {1}'.format(
-            self.collection_name, item))
+        logger.debug('Parsed item: {0}'.format(item))
         result = self.db[self.collection_name].update_one(
             {
                 'url': item.get('url'),

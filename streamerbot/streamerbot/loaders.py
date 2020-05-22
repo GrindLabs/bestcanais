@@ -11,7 +11,7 @@ from scrapy.loader.processors import MapCompose, TakeFirst
 from slugify import slugify
 
 from streamerbot.items import StreamerBotItem
-from streamerbot.processors import extract_quality
+from streamerbot.processors import extract_quality, extract_name
 
 
 class StreamerBotItemLoader(ItemLoader):
@@ -20,3 +20,10 @@ class StreamerBotItemLoader(ItemLoader):
     slug_in = MapCompose(slugify)
     quality_in = MapCompose(extract_quality)
     source_id_out = TakeFirst()
+
+
+class TopCanaisItemLoader(StreamerBotItemLoader):
+    name_in = MapCompose(lambda v: extract_name(
+        v, r'assistir\s(.+)\sao\svivo'))
+    slug_in = MapCompose(lambda v: extract_name(
+        v, r'assistir\s(.+)\sao\svivo'), slugify)

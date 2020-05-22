@@ -19,9 +19,23 @@ def extract_quality(value):
         int -- The quality value
     """
     quality = re.search(r'({0})$'.format(
-        '|'.join(list(settings.STREAM_PRIORITY.keys()))), value)
+        '|'.join(list(settings.STREAM_PRIORITY.keys()))), value, re.I)
 
     if quality:
-        return settings.STREAM_PRIORITY.get(quality.group(0))
+        return settings.STREAM_PRIORITY.get(quality.group(1))
 
     return settings.STREAM_PRIORITY.get('SD')
+
+
+def extract_name(value, regex):
+    """Extract the channel name based on a regex
+
+    Arguments:
+        value {string} -- The channel name
+        regex {string} -- The regex
+
+    Returns:
+        string -- The channel name
+    """
+    name = re.search(regex, value, re.I)
+    return name.group(1) if name else 'Unknown Channel'
