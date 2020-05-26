@@ -1,2 +1,3 @@
-# BestCanais - Player
-The complete solution to play the restreaming of IPTV channels.
+# DeGalera Frontend
+
+DeGalera official web site.

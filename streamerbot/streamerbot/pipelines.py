@@ -10,7 +10,7 @@ import time
 
 import requests
 from pymongo import MongoClient
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 
 from streamerbot import settings
 from streamerbot.settings import logger
@@ -57,11 +57,12 @@ class ExtractM3U8Pipeline(object):
             'id': int(time.time())
         }
         logger.debug('Payload: {0}'.format(payload))
-        result = requests.post(settings.PUPPETEER_SERVICE_URL, json=payload)
-        logger.debug('Puppeteer service status: {0}'.format(
-            result.status_code))
 
         try:
+            result = requests.post(
+                settings.PUPPETEER_SERVICE_URL, json=payload, timeout=30)
+            logger.debug('Puppeteer service status: {0}'.format(
+                result.status_code))
             result.raise_for_status()
             json_data = result.json()
             logger.debug('Response: {0}'.format(json_data))
@@ -70,7 +71,7 @@ class ExtractM3U8Pipeline(object):
                 item.get('stream_url')
                 if item.get('stream_url')
                 else 'not found'))
-        except HTTPError as err:
+        except RequestException as err:
             logger.warning(
                 'Unable to reach the Puppeteer Service: {0}'.format(str(err)))
             item['stream_url'] = None
@@ -88,13 +89,12 @@ class StreamVerificationPipeline(object):
         logger.info('Verifying stream URL {0}'.format(
             item.get('stream_url')))
 
-        result = requests.get(item.get('stream_url'), headers={
-                              'Referer': item.get('url')})
-
         try:
+            result = requests.get(item.get('stream_url'), headers={
+                'Referer': item.get('url')}, timeout=30)
             result.raise_for_status()
             item['is_active'] = result.status_code == 200
-        except HTTPError as err:
+        except RequestException as err:
             logger.warning(
                 'Unable to verify the stream URL: {0}'.format(str(err)))
             item['is_active'] = False
@@ -118,10 +118,9 @@ class MongoPipeline(MongoBasePipeline):
                 '$set': {
                     'name': item.get('name'),
                     'slug': item.get('slug'),
-                    'logo': item.get('logo'),
                     'quality': item.get('quality'),
                     'url': item.get('url'),
-                    'stream_url': item.get('stream_url'),
+                    'streamUrl': item.get('stream_url'),
                     'isActive': item.get('is_active'),
                     'sourceId': item.get('source_id'),
                     'verifiedAt': datetime.datetime.utcfromtimestamp(

@@ -1,9 +1,13 @@
 import scrapy
 from pymongo import MongoClient
 from scrapy.exceptions import CloseSpider
+# from scrapy.linkextractors import LinkExtractor
+# from scrapy.spiders import Rule
 
 from streamerbot import settings
 from streamerbot.loaders import TopCanaisItemLoader
+
+from streamerbot.settings import logger
 
 
 class TopCanaisSpider(scrapy.Spider):
@@ -22,10 +26,18 @@ class TopCanaisSpider(scrapy.Spider):
                     self.name))
 
         self.start_urls = self.source.get('lookup')
-        self.allowed_domains = list(self.source.get('domain'))
+        self.allowed_domains = [self.source.get('domain')]
+        # self.rules = (
+        #     Rule(LinkExtractor(restrict_xpaths=(
+        #         '//*[@id="primary"]/div/div[2]/div/a',), attrs=(
+        #         'data-g1-next-page-url',)), callback='parse_item',
+        #         follow=True),
+        # )
         self.client.close()
 
     def parse(self, response):
+        logger.debug('Current page: {0}'.format(response.url))
+
         for block in self.source.get('blocks'):
             for channel in response.xpath(block.get('path')):
                 loader = TopCanaisItemLoader(selector=channel)
@@ -36,3 +48,9 @@ class TopCanaisSpider(scrapy.Spider):
                     loader.add_xpath(field.get('key'), field.get('path'))
 
                 yield loader.load_item()
+
+        request = scrapy.Request(response.xpath(
+            '//*[@id="primary"]/div/div[2]/div/a/@data-g1-next-page-url'
+        ).extract_first())
+        logger.debug('Next page: {0}'.format(request.url))
+        yield request

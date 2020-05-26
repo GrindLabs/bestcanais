@@ -11,7 +11,6 @@ import scrapy
 class StreamerBotItem(scrapy.Item):
     name = scrapy.Field()
     slug = scrapy.Field()
-    logo = scrapy.Field()
     quality = scrapy.Field()
     url = scrapy.Field()
     stream_url = scrapy.Field()

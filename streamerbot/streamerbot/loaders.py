@@ -19,7 +19,6 @@ class StreamerBotItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
     slug_in = MapCompose(slugify)
     quality_in = MapCompose(extract_quality)
-    source_id_out = TakeFirst()
 
 
 class TopCanaisItemLoader(StreamerBotItemLoader):
