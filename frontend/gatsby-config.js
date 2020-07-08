@@ -10,7 +10,7 @@ require('dotenv').config({
 
 module.exports = {
   siteMetadata: {
-    title: `Assista TV online GRÁTIS! ~ BestCanais`,
+    title: `Assista TV Online GRÁTIS! ~ BestCanais`,
   },
   plugins: [
     `gatsby-plugin-material-ui`,
@@ -28,20 +28,21 @@ module.exports = {
         path: `${__dirname}/src/assets/images/`,
       },
     },
-    `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
-    {
-      resolve: `gatsby-plugin-manifest`,
-      options: {
-        name: `BestCanais`,
-        short_name: `BestCanais`,
-        start_url: `/`,
-        background_color: `#6b37bf`,
-        theme_color: `#6b37bf`,
-        display: `standalone`,
-        // icon: ``,
-      },
-    },
+    `gatsby-transformer-sharp`,
+    // {
+    //   resolve: `gatsby-plugin-manifest`,
+    //   options: {
+    //     name: `BestCanais`,
+    //     short_name: `BestCanais`,
+    //     description: `Os melhores canais da TV fechada disponíveis gratuitamente.`,
+    //     lang: `pt-br`,
+    //     start_url: `/tv-online`,
+    //     background_color: `#6b37bf`,
+    //     theme_color: `#6b37bf`,
+    //     display: `standalone`,
+    //   },
+    // },
     `gatsby-plugin-offline`,
     {
       resolve: `gatsby-source-graphql`,
@@ -49,7 +50,6 @@ module.exports = {
         typeName: `BestCanais`,
         fieldName: `bestcanais`,
         url: process.env.GRAPHQL_URI,
-        refetchInterval: 60,
       },
     },
   ],

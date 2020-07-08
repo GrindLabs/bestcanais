@@ -1,0 +1,17 @@
+.vjs-channel-info #channel-show-info {
+  position: relative;
+}
+
+.vjs-channel-info #channel-info {
+  font-weight: bold;
+}
+
+.vjs-channel-info #time-progress {
+  position: absolute;
+  width: 56%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: gray;
+  opacity: 0.5;
+}

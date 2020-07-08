@@ -1,0 +1,33 @@
+.video-js .vjs-hud {
+  display: none;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  padding: 15px 0 10px 0;
+}
+
+.vjs-has-started .vjs-hud {
+  display: flex;
+  visibility: visible;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.vjs-has-started .vjs-hud div {
+  opacity: 1;
+}
+
+.vjs-has-started.vjs-user-inactive.vjs-playing {
+  cursor: none;
+}
+
+.vjs-has-started.vjs-user-inactive.vjs-playing .vjs-hud {
+  visibility: visible;
+  opacity: 0;
+}
+
+.vjs-has-started.vjs-no-flex .vjs-hud {
+  display: table;
+}
